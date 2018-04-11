@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>ALICE CHATBOT</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700i" rel="stylesheet">
+    <style type="text/css">
+    .navbar-nav > li > a
+{
+  height: 58px;
+  line-height: 19px;
+  text-align: center;
+  padding: 0 5px;
+}
+.navbar-nav{
+  display: table;
+  background: #f5f5f5;
+  padding: 0;
+  margin: 0;
+}
+.navbar-nav > li{
+  display: table-cell;
+  vertical-align: middle;
+  
+  float: none !important;
+  text-align: center;
+  border-left: 2px solid #fff;
+}
+.navbar-nav > li:first-child{border: 0;}
+    .topicText2Class {
+    text-anchor: middle;
+    alignment-baseline: middle;
+    font: 12px 'Open Sans', sans-serif;
+    pointer-events: none;
+    cursor: default;
+}
+.topicText1Class {
+    text-anchor: middle;
+    alignment-baseline: middle;
+    font: 17px 'Open Sans', sans-serif;
+    pointer-events: none;
+    cursor: default;
+}
+        .fixed-panel {
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: scroll;
+        }
+
+        .media-list {
+            overflow: auto;
+        }
+
+        .axis {
+            font: 10px sans-serif;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #refresh-btn {
+            float: right;
+            font-size: 12px;
+            border-radius: 0;
+        }
+
+        img {
+            width: 85px;
+            height: 50px;
+        }
+
+        .slice text {
+            font-size: 10pt;
+            font-family: Arial;
+        }
+
+        .loader {
+            position: absolute;
+            padding-top: 100px;
+            left: 48%;
+            height: 300px;
+        }
+
+        .line {
+            animation: expand 1s ease-in-out infinite;
+            border-radius: 10px;
+            display: inline-block;
+            transform-origin: center center;
+            margin: 0 3px;
+            width: 1px;
+            height: 25px;
+        }
+
+        .line:nth-child(1) {
+            background: #27ae60;
+        }
+
+        .line:nth-child(2) {
+            animation-delay: 180ms;
+            background: #f1c40f;
+        }
+
+        .line:nth-child(3) {
+            animation-delay: 360ms;
+            background: #e67e22;
+        }
+
+        .line:nth-child(4) {
+            animation-delay: 540ms;
+            background: #2980b9;
+        }
+
+        .hexStyle{
+            font-size: 9px;
+            font-family: Times;
+        }
+        .hexStyle1{
+            font-size: 10px;
+            font-family: Times;
+            font-weight: bold;
+        }
+
+        @keyframes expand {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(2);
+            }
+        }
+        body{
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+    </style>
+
+    <script type="text/javascript" src="http://localhost:5000/js/d3.js"></script>
+
+    <script type="text/javascript" src="http://d3js.org/d3.hexbin.v0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-hexjson@1.0.1/build/d3-hexjson.js"></script>
+
+
+</head>
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a href="#"></a>
+                <img src="https://cdn.dribbble.com/users/279657/screenshots/2701628/chatbot_1x.png">
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="#" style="font-family: 'Montserrat', sans-serif;font-weight: 700;
+    font-style: italic;">ALICE CHATBOT</a>
+                </li>
+                <li><a href="#" style="font-family: 'Montserrat', sans-serif;font-weight: 400;
+    font-style: italic;">Alice Chat is an artificial conversational entity which operates in an interactive way.</a></li>
+                <li><a href="/about" style="font-family: 'Montserrat', sans-serif;font-weight: 400;">About the<br> chatbot</a></li>
+                    <li><a href="/howto" style="font-family: 'Montserrat', sans-serif;font-weight: 400;">How to use<br> chatbot</a></li>
+                    <li><a href="/contact" style="font-family: 'Montserrat', sans-serif;font-weight: 400;">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-5 col-sm-12 col-xs-12">
+                <div id="chatPanel" class="panel panel-info">
+                    <div class="panel-heading">
+                        <strong>
+                            <span class="glyphicon glyphicon-list"></span> Chat History</strong>
+                    </div>
+                    <div class="panel-body fixed-panel">
+                        <ul class="media-list">
+                        </ul>
+                    </div>
+                    <div class="panel-footer">
+                        <form method="post" id="chatbot-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Enter Message" name="messageText" id="messageText" autofocus/>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-info" type="button" id="chatbot-form-btn">SEND
+                                        <span class="glyphicon glyphicon-send"></span>
+                                    </button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7 col-sm-12 col-xs-12">
+                <div id="hex-map"></div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <div id="div_tbl_tr" >
+                    
+                </div>
+            </div>
+			<div class="col-md-6 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                <div id="topic_sim"></div></div>
+                <div class="col-md-12 col-sm-12 col-xs-12" id='wordcloud'></div>
+            <div class="col-md-12 col-sm-12 col-xs-12" id="theSvg"></div>
+            </div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="row">
+            <div class="col-md-1"></div>
+            <div class="col-md-10" id="topic_display" ></div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>
+        <!-- <div class="row justify-content-center">
+            <div id='wordcloud'></div>
+        </div> -->
+        <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="row">
+            <div id='lda_graph'></div>
+            <div id="includedContent"></div>
+        </div>
+</div>
+        
+    </div>
+
+    <div style="display:none">
+        <div id="loader">
+            <div class="loader">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
+                <br>
+                <br> 
+                <p class="text-info">Please Wait</p>
+            </div>
+        </div>
+    </div>
+    <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    
+
+
+
+
+
+
+    <script>
+        function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+var coloursYGB = ["#FFFFDD","#AAF191","#80D385","#61B385","#3E9583","#217681","#285285","#1F2D86","#000086"];
+var colourRangeYGB = d3.range(0, 1, 1.0 / (coloursYGB.length - 1));
+colourRangeYGB.push(1);
+           
+//Create color gradient
+
+
+///////////////////////////////////////////////////////////////////////////
+//////////////////// Create the Rainbow color gradient ////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+//Calculate the gradient    
+
+
+        var hex_clicked=false;
+        var hex_map = function (hex_data) {
+            var data = hex_data
+            if (data.length > 0) {
+                $("#hex-map").append('<h1>Hex Map</h1>');
+                $("#hex-map").append("<h5 style='display:none'>Cosine Distance : <span id=\"coisneDistance\"></span></h5>");
+                $("#hex-map").append("<h5>Link for more information : <a id=\"linkBox\"></a></h5>");
+                $("#hex-map").append("<div style='text-align: center;' >Click on Hexagon to get details</div>");
+                $("#hex-map").append("<div id=\"hexGraph\"></div>");
+
+                somData=[]
+                var hexes_data = generateHexesData()
+                
+
+                function generateHexesData() {
+                    var hexes_data = {}
+                    for (i = 0; i < data.length; i++) {
+                        index = parseInt(i / 3)
+                        q = index
+                        r = index
+                        index_residule = i - index * 3
+                        if (index_residule === 0) {
+                            q = q + 1
+                        }
+                        if (index_residule === 1) {
+                            r = r + 1
+                        }
+                        if (index_residule === 2) {
+                            r = r + 1
+                            q = q + 1
+                        }
+                        //console.log('q:'+q+'r:'+r+'index_residule:'+index_residule)
+                        current_data = data[i]
+                        var hexe = {}
+                        somData.push(parseFloat(Math.round(current_data['Text Relevance'] * 100) / 100).toFixed(2))
+                        hexes_data[i+""] = {
+                            "q": parseInt(q + ""),
+                            "r": parseInt(r + ""),
+                            "text": current_data['snippet'],
+                            "cosine_distance": current_data['cosine_distance'],
+                            "labels": current_data['lables'],
+                            "url": current_data['url'],
+                            "text_relevance":parseFloat(Math.round(current_data['Text Relevance'] * 100) / 100).toFixed(2)
+                        }
+                    }
+                    return hexes_data
+                }
+                var hex_data_json = {
+                    "layout": "odd-r",
+                    "hexes": hexes_data
+                }
+                hexjson = hex_data_json
+                console.log(hexjson)
+                var colorScaleYGB = d3.scale.linear()
+    .domain(colourRangeYGB)
+    .range(coloursYGB)
+    .interpolate(d3.interpolateHcl);
+
+//Needed to map the values of the dataset to the color scale
+var colorInterpolateYGB = d3.scale.linear()
+    .domain(d3.extent(somData))
+    .range([0,1]);
+
+///////////////////////////////////////////////////////////////////////////
+///////////////////// Create the YGB color gradient ///////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+//Calculate the gradient    
+
+
+///////////////////////////////////////////////////////////////////////////
+//////////// Get continuous color scale for the Rainbow ///////////////////
+///////////////////////////////////////////////////////////////////////////
+
+var coloursRainbow = ["#2c7bb6", "#00a6ca","#00ccbc","#90eb9d","#ffff8c","#f9d057","#f29e2e","#e76818","#d7191c"];
+var colourRangeRainbow = d3.range(0, 1, 1.0 / (coloursRainbow.length - 1));
+colourRangeRainbow.push(1);
+           
+//Create color gradient
+var colorScaleRainbow = d3.scale.linear()
+    .domain(colourRangeRainbow)
+    .range(coloursRainbow)
+    .interpolate(d3.interpolateHcl);
+
+//Needed to map the values of the dataset to the color scale
+var colorInterpolateRainbow = d3.scale.linear()
+    .domain(d3.extent(somData))
+    .range([0,1]);
+                // Set the size and margins of the svg
+                var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+                    width = 700 - margin.left - margin.right,
+                    height = 700 - margin.top - margin.bottom;
+
+                // Create the svg element
+                var svg = d3
+                    .select("#hexGraph")
+                    .append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                // Render the hexes
+                var hexes = d3.renderHexJSON(hexjson, width, height);
+
+                // Bind the hexes to g elements of the svg and position them
+                var hexmap = svg
+                    .selectAll("g")
+                    .data(hexes)
+                    .enter()
+                    .append("g")
+                    .attr("transform", function (hex) {
+                        return "translate(" + hex.x + "," + hex.y + ")";
+                    });
+
+                // Draw the polygons around each hex's centre
+                hexmap
+                    .append("polygon")
+                    .attr("points", function (hex) { return hex.points; })
+                    .on("click", function (hex) {
+                          if(hex_clicked){
+                            return
+                        }
+                        hex_clicked=true
+                        $('#lda_graph').html($('#loader').html());
+                        $('#includedContent').html($('#loader').html());
+                        $('#wordcloud').html($('#loader').html());
+                        $('#the_topics').html($('#loader').html());
+                        $('#theSvg').html('');
+                        $('#thePie').html($('#loader').html());
+                      
+                        
+                        console.log(hex)
+
+                        $("#linkBox").attr("href", unescape(hex.url))
+                        $("#linkBox").text(unescape(hex.url))
+                        $.ajax({
+                            type: "POST",
+                            url: "/lda",
+                            cache: false,
+                            data: { 'text': hex['text'] },
+                            success: function (response) {
+                                hex_clicked=false
+                                $('#lda_graph').html('');
+                                $('#includedContent').html('');
+                                $('#wordcloud').html('');
+                                /*$('#the_topics').html('');
+                                $('#thePie').html('');*/
+                                /*pie_chart(response.answer.the_counts);
+                                table_topics(response.answer.topics);*/
+                                the_word_cloud(response.answer.the_counts);
+                            },
+                            error: function (error) {
+                                hex_clicked=false
+                                console.log(error);
+                            }
+                        });
+                    })
+                    .on("mouseover", function (hex) {
+                        $("#coisneDistance").text(hex.cosine_distance.toFixed(3))
+                        var element = $(this)
+                        element.css( 'cursor', 'pointer' );
+                        console.log(hex);
+                        element.attr("stroke", "#464647")
+                        .attr("stroke-width", "2.5")
+                        .attr("fill", "#4695ea"); //#FFA000
+                    }).on("mouseout", function (hex) {
+                        var element = $(this)
+                        element.attr("stroke","black").attr("fill", function () {
+                   
+                        
+
+                     return colorScaleRainbow(colorInterpolateRainbow(parseFloat(hex.text_relevance) ));});
+                    })
+                    .attr("stroke", "black")
+                    .attr("stroke-width", "2")
+                    .attr("fill",function (d,i) {
+                      
+                        
+
+                     return colorScaleRainbow(colorInterpolateRainbow(parseFloat(d.text_relevance) ));});
+                    
+                hexmap
+            .append('text')
+            .classed ("topicText1Class", true)
+            .text(function(hex,i){return hex.labels[0].lable})
+
+        hexmap
+            .append('text')
+            .attr("y", -14)
+            .classed ("topicText2Class", true)
+            .text(function(hex,i){return hex.labels[1].lable})
+            
+        hexmap
+            .append('text')
+            .attr("y", +14)
+            .classed ("topicText2Class", true)
+            .text(function(hex,i){return hex.labels[2].lable})
+
+        hexmap
+            .append('text')
+            .attr("y", +28)
+            .classed ("topicText2Class", true)
+            .text(function(hex,i){return hex['text_relevance']})
+
+                // Add the hex codes as labels  
+                // hexmap
+                //     .append("text")
+                //     // .append("tspan")
+                //     //.attr("text-anchor", "middle")
+                //     .html(function (hex) { 
+                //             label0 = hex.labels[0]
+                //             return '<tspan x="-25" y="-10" dy="0.2em" class="hexStyle1">'+hex.labels[0].lable+'</tspan><tspan x="-25" y="-6" dy="1.2em" class="hexStyle">'+hex.labels[1].lable+'</tspan><tspan x="-25" y="-2" dy="2.2em" class="hexStyle">'+hex.labels[2].lable+'</tspan><tspan x="-25" y="1" dy="3.2em" class="hexStyle">'
+                //                 +hex['text_relevance']+'</tspan>';
+                //             /*return '<tspan text-anchor="start" x="0" dy="0em">'+ hex.labels[0].lable+'</tspan><tspan text-anchor="start" x="0" dy="1em">'+hex.labels[1].lable+'</tspan><tspan text-anchor="start" x="0" dy="2em">'+hex.labels[2].lable+'</tspan>';*/
+                //          });
+            }
+
+        }
+
+        /*var pie_chart = function (the_data) {
+            if (the_data.length > 0) {
+                console.log(the_data)
+                $("#thePie").append('<h2>The pie chart</h2>');
+                var w = 500,                        //width
+                    h = 500,                            //height
+                    r = 200,                            //radius
+                    color = d3.scale.category20c();     //builtin range of colors
+
+                data = the_data.slice(0, 5);
+
+                var vis = d3.select("#thePie")
+                    .append("svg:svg")              //create the SVG element inside the <body>
+                    .data([data])                   //associate our data with the document
+                    .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+                    .attr("height", h)
+                    .append("svg:g")                //make a group to hold our pie chart
+                    .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+
+                var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+                    .outerRadius(r);
+
+                var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+                    .value(function (d) { return d.value; });    //we must tell it out to access the value of each element in our data array
+
+                var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+                    .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+                    .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+                    .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                    .attr("class", "slice");    //allow us to style things in the slices (like text)
+
+                arcs.append("svg:path")
+                    .style("fill", function (d, i) { return color(i); }) //set the color for each slice to be chosen from the color function defined above
+                    .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+
+                arcs.append("svg:text")                                     //add a label to each slice
+                    .attr("transform", function (d) {                    //set the label's origin to the center of the arc
+                        //we have to make sure to set these before calling arc.centroid
+                        d.innerRadius = 0;
+                        d.outerRadius = r;
+                        return "translate(" + arc.centroid(d) + ")";        //this gives us a pair of coordinates like [50, 50]
+                    })
+                    .attr("text-anchor", "middle")                          //center the text on it's origin
+                    .text(function (d, i) { return data[i].data; });
+
+            }
+        }
+        var table_topics = function (topics) {
+
+            console.log(topics);
+            if (topics.length > 0) {
+                $("#the_topics").append('<tr><th>The topics</th></tr>');
+                for (i = 0; i < topics.length; i++) {
+                    $("#the_topics").append('<tr><td>' + topics[i] + '</td></tr>');
+                }
+
+            }
+        }*/
+
+        var the_word_cloud = function (data) {
+
+            var word_cloud = []
+            for (i = 0; i < data.length; i++) {
+                word_cloud.push({ text: data[i].data, size: data[i].value });
+            }
+            console.log(word_cloud)
+            if (word_cloud.length > 0) {
+
+
+                $("#wordcloud").append('<h1>Word Cloud</h1>');
+
+                $("#theSvg").append('<h2>Bar chart</h2>');
+                $.ajax({
+                    url: "{{ url_for('static', filename='data.html') }}",
+                    type: "get",
+                    cache: false,
+                    dataType: "text",
+                    success: function (data) {
+                        $("#lda_graph").append('<h1>LDA main graph</h1>');
+                        $("#includedContent").html(data);
+                    }
+                });
+
+                // Word cloud layout by Jason Davies, http://www.jasondavies.com/word-cloud/
+                // Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
+                (function () {
+                    function cloud() {
+                        var size = [256, 256],
+                            text = cloudText,
+                            font = cloudFont,
+                            fontSize = cloudFontSize,
+                            fontStyle = cloudFontNormal,
+                            fontWeight = cloudFontNormal,
+                            rotate = cloudRotate,
+                            padding = cloudPadding,
+                            spiral = archimedeanSpiral,
+                            words = [],
+                            timeInterval = Infinity,
+                            event = d3.dispatch("word", "end"),
+                            timer = null,
+                            cloud = {};
+
+                        cloud.start = function () {
+                            var board = zeroArray((size[0] >> 5) * size[1]),
+                                bounds = null,
+                                n = words.length,
+                                i = -1,
+                                tags = [],
+                                data = words.map(function (d, i) {
+                                    d.text = text.call(this, d, i);
+                                    d.font = font.call(this, d, i);
+                                    d.style = fontStyle.call(this, d, i);
+                                    d.weight = fontWeight.call(this, d, i);
+                                    d.rotate = rotate.call(this, d, i);
+                                    d.size = ~~fontSize.call(this, d, i);
+                                    d.padding = padding.call(this, d, i);
+                                    return d;
+                                }).sort(function (a, b) { return b.size - a.size; });
+
+                            if (timer) clearInterval(timer);
+                            timer = setInterval(step, 0);
+                            step();
+
+                            return cloud;
+
+                            function step() {
+                                var start = +new Date,
+                                    d;
+                                while (+new Date - start < timeInterval && ++i < n && timer) {
+                                    d = data[i];
+                                    d.x = (size[0] * (Math.random() + .5)) >> 1;
+                                    d.y = (size[1] * (Math.random() + .5)) >> 1;
+                                    cloudSprite(d, data, i);
+                                    if (d.hasText && place(board, d, bounds)) {
+                                        tags.push(d);
+                                        event.word(d);
+                                        if (bounds) cloudBounds(bounds, d);
+                                        else bounds = [{ x: d.x + d.x0, y: d.y + d.y0 }, { x: d.x + d.x1, y: d.y + d.y1 }];
+                                        // Temporary hack
+                                        d.x -= size[0] >> 1;
+                                        d.y -= size[1] >> 1;
+                                    }
+                                }
+                                if (i >= n) {
+                                    cloud.stop();
+                                    event.end(tags, bounds);
+                                }
+                            }
+                        }
+
+                        cloud.stop = function () {
+                            if (timer) {
+                                clearInterval(timer);
+                                timer = null;
+                            }
+                            return cloud;
+                        };
+
+                        cloud.timeInterval = function (x) {
+                            if (!arguments.length) return timeInterval;
+                            timeInterval = x == null ? Infinity : x;
+                            return cloud;
+                        };
+
+                        function place(board, tag, bounds) {
+                            var perimeter = [{ x: 0, y: 0 }, { x: size[0], y: size[1] }],
+                                startX = tag.x,
+                                startY = tag.y,
+                                maxDelta = Math.sqrt(size[0] * size[0] + size[1] * size[1]),
+                                s = spiral(size),
+                                dt = Math.random() < .5 ? 1 : -1,
+                                t = -dt,
+                                dxdy,
+                                dx,
+                                dy;
+
+                            while (dxdy = s(t += dt)) {
+                                dx = ~~dxdy[0];
+                                dy = ~~dxdy[1];
+
+                                if (Math.min(dx, dy) > maxDelta) break;
+
+                                tag.x = startX + dx;
+                                tag.y = startY + dy;
+
+                                if (tag.x + tag.x0 < 0 || tag.y + tag.y0 < 0 ||
+                                    tag.x + tag.x1 > size[0] || tag.y + tag.y1 > size[1]) continue;
+                                // TODO only check for collisions within current bounds.
+                                if (!bounds || !cloudCollide(tag, board, size[0])) {
+                                    if (!bounds || collideRects(tag, bounds)) {
+                                        var sprite = tag.sprite,
+                                            w = tag.width >> 5,
+                                            sw = size[0] >> 5,
+                                            lx = tag.x - (w << 4),
+                                            sx = lx & 0x7f,
+                                            msx = 32 - sx,
+                                            h = tag.y1 - tag.y0,
+                                            x = (tag.y + tag.y0) * sw + (lx >> 5),
+                                            last;
+                                        for (var j = 0; j < h; j++) {
+                                            last = 0;
+                                            for (var i = 0; i <= w; i++) {
+                                                board[x + i] |= (last << msx) | (i < w ? (last = sprite[j * w + i]) >>> sx : 0);
+                                            }
+                                            x += sw;
+                                        }
+                                        delete tag.sprite;
+                                        return true;
+                                    }
+                                }
+                            }
+                            return false;
+                        }
+
+                        cloud.words = function (x) {
+                            if (!arguments.length) return words;
+                            words = x;
+                            return cloud;
+                        };
+
+                        cloud.size = function (x) {
+                            if (!arguments.length) return size;
+                            size = [+x[0], +x[1]];
+                            return cloud;
+                        };
+
+                        cloud.font = function (x) {
+                            if (!arguments.length) return font;
+                            font = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.fontStyle = function (x) {
+                            if (!arguments.length) return fontStyle;
+                            fontStyle = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.fontWeight = function (x) {
+                            if (!arguments.length) return fontWeight;
+                            fontWeight = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.rotate = function (x) {
+                            if (!arguments.length) return rotate;
+                            rotate = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.text = function (x) {
+                            if (!arguments.length) return text;
+                            text = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.spiral = function (x) {
+                            if (!arguments.length) return spiral;
+                            spiral = spirals[x + ""] || x;
+                            return cloud;
+                        };
+
+                        cloud.fontSize = function (x) {
+                            if (!arguments.length) return fontSize;
+                            fontSize = d3.functor(x);
+                            return cloud;
+                        };
+
+                        cloud.padding = function (x) {
+                            if (!arguments.length) return padding;
+                            padding = d3.functor(x);
+                            return cloud;
+                        };
+
+                        return d3.rebind(cloud, event, "on");
+                    }
+
+                    function cloudText(d) {
+                        return d.text;
+                    }
+
+                    function cloudFont() {
+                        return "serif";
+                    }
+
+                    function cloudFontNormal() {
+                        return "normal";
+                    }
+
+                    function cloudFontSize(d) {
+                        return Math.sqrt(d.value);
+                    }
+
+                    function cloudRotate() {
+                        return 0;
+                    }
+
+                    function cloudPadding() {
+                        return 1;
+                    }
+
+                    // Fetches a monochrome sprite bitmap for the specified text.
+                    // Load in batches for speed.
+                    function cloudSprite(d, data, di) {
+                        if (d.sprite) return;
+                        c.clearRect(0, 0, (cw << 5) / ratio, ch / ratio);
+                        var x = 0,
+                            y = 0,
+                            maxh = 0,
+                            n = data.length;
+                        --di;
+                        while (++di < n) {
+                            d = data[di];
+                            c.save();
+                            c.font = d.style + " " + d.weight + " " + ~~((d.size + 1) / ratio) + "px " + d.font;
+                            var w = c.measureText(d.text + "m").width * ratio,
+                                h = d.size << 1;
+                            if (d.rotate) {
+                                var sr = Math.sin(d.rotate * cloudRadians),
+                                    cr = Math.cos(d.rotate * cloudRadians),
+                                    wcr = w * cr,
+                                    wsr = w * sr,
+                                    hcr = h * cr,
+                                    hsr = h * sr;
+                                w = (Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr)) + 0x1f) >> 5 << 5;
+                                h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
+                            } else {
+                                w = (w + 0x1f) >> 5 << 5;
+                            }
+                            if (h > maxh) maxh = h;
+                            if (x + w >= (cw << 5)) {
+                                x = 0;
+                                y += maxh;
+                                maxh = 0;
+                            }
+                            if (y + h >= ch) break;
+                            c.translate((x + (w >> 1)) / ratio, (y + (h >> 1)) / ratio);
+                            if (d.rotate) c.rotate(d.rotate * cloudRadians);
+                            c.fillText(d.text, 0, 0);
+                            if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
+                            c.restore();
+                            d.width = w;
+                            d.height = h;
+                            d.xoff = x;
+                            d.yoff = y;
+                            d.x1 = w >> 1;
+                            d.y1 = h >> 1;
+                            d.x0 = -d.x1;
+                            d.y0 = -d.y1;
+                            d.hasText = true;
+                            x += w;
+                        }
+                        var pixels = c.getImageData(0, 0, (cw << 5) / ratio, ch / ratio).data,
+                            sprite = [];
+                        while (--di >= 0) {
+                            d = data[di];
+                            if (!d.hasText) continue;
+                            var w = d.width,
+                                w32 = w >> 5,
+                                h = d.y1 - d.y0;
+                            // Zero the buffer
+                            for (var i = 0; i < h * w32; i++) sprite[i] = 0;
+                            x = d.xoff;
+                            if (x == null) return;
+                            y = d.yoff;
+                            var seen = 0,
+                                seenRow = -1;
+                            for (var j = 0; j < h; j++) {
+                                for (var i = 0; i < w; i++) {
+                                    var k = w32 * j + (i >> 5),
+                                        m = pixels[((y + j) * (cw << 5) + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
+                                    sprite[k] |= m;
+                                    seen |= m;
+                                }
+                                if (seen) seenRow = j;
+                                else {
+                                    d.y0++;
+                                    h--;
+                                    j--;
+                                    y++;
+                                }
+                            }
+                            d.y1 = d.y0 + seenRow;
+                            d.sprite = sprite.slice(0, (d.y1 - d.y0) * w32);
+                        }
+                    }
+
+                    // Use mask-based collision detection.
+                    function cloudCollide(tag, board, sw) {
+                        sw >>= 5;
+                        var sprite = tag.sprite,
+                            w = tag.width >> 5,
+                            lx = tag.x - (w << 4),
+                            sx = lx & 0x7f,
+                            msx = 32 - sx,
+                            h = tag.y1 - tag.y0,
+                            x = (tag.y + tag.y0) * sw + (lx >> 5),
+                            last;
+                        for (var j = 0; j < h; j++) {
+                            last = 0;
+                            for (var i = 0; i <= w; i++) {
+                                if (((last << msx) | (i < w ? (last = sprite[j * w + i]) >>> sx : 0))
+                                    & board[x + i]) return true;
+                            }
+                            x += sw;
+                        }
+                        return false;
+                    }
+
+                    function cloudBounds(bounds, d) {
+                        var b0 = bounds[0],
+                            b1 = bounds[1];
+                        if (d.x + d.x0 < b0.x) b0.x = d.x + d.x0;
+                        if (d.y + d.y0 < b0.y) b0.y = d.y + d.y0;
+                        if (d.x + d.x1 > b1.x) b1.x = d.x + d.x1;
+                        if (d.y + d.y1 > b1.y) b1.y = d.y + d.y1;
+                    }
+
+                    function collideRects(a, b) {
+                        return a.x + a.x1 > b[0].x && a.x + a.x0 < b[1].x && a.y + a.y1 > b[0].y && a.y + a.y0 < b[1].y;
+                    }
+
+                    function archimedeanSpiral(size) {
+                        var e = size[0] / size[1];
+                        return function (t) {
+                            return [e * (t *= .1) * Math.cos(t), t * Math.sin(t)];
+                        };
+                    }
+
+                    function rectangularSpiral(size) {
+                        var dy = 4,
+                            dx = dy * size[0] / size[1],
+                            x = 0,
+                            y = 0;
+                        return function (t) {
+                            var sign = t < 0 ? -1 : 1;
+                            // See triangular numbers: T_n = n * (n + 1) / 2.
+                            switch ((Math.sqrt(1 + 4 * sign * t) - sign) & 3) {
+                                case 0: x += dx; break;
+                                case 1: y += dy; break;
+                                case 2: x -= dx; break;
+                                default: y -= dy; break;
+                            }
+                            return [x, y];
+                        };
+                    }
+
+                    // TODO reuse arrays?
+                    function zeroArray(n) {
+                        var a = [],
+                            i = -1;
+                        while (++i < n) a[i] = 0;
+                        return a;
+                    }
+
+                    var cloudRadians = Math.PI / 180,
+                        cw = 1 << 11 >> 5,
+                        ch = 1 << 11,
+                        canvas,
+                        ratio = 1;
+
+                    if (typeof document !== "undefined") {
+                        canvas = document.createElement("canvas");
+                        canvas.width = 1;
+                        canvas.height = 1;
+                        ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
+                        canvas.width = (cw << 5) / ratio;
+                        canvas.height = ch / ratio;
+                    } else {
+                        // Attempt to use node-canvas.
+                        canvas = new Canvas(cw << 5, ch);
+                    }
+
+                    var c = canvas.getContext("2d"),
+                        spirals = {
+                            archimedean: archimedeanSpiral,
+                            rectangular: rectangularSpiral
+                        };
+                    c.fillStyle = c.strokeStyle = "red";
+                    c.textAlign = "center";
+
+                    if (typeof module === "object" && module.exports) module.exports = cloud;
+                    else (d3.layout || (d3.layout = {})).cloud = cloud;
+                })();
+
+
+
+
+                // easy d3-based word cloud plugin https://github.com/wvengen/d3-wordcloud
+                // requires https://github.com/jasondavies/d3-cloud
+                // based on https://github.com/shprink/d3js-wordcloud
+                (function () {
+                    function wordcloud() {
+                        var selector = '#wordcloud',
+                            element = d3.select(selector),
+                            transitionDuration = 200,
+                            scale = 'sqrt',
+                            fill = d3.scale.category20b(),
+                            layout = d3.layout.cloud(),
+                            fontSize = null,
+                            svg = null,
+                            vis = null,
+                            onwordclick = undefined;
+
+                        wordcloud.element = function (x) {
+                            if (!arguments.length) return element;
+                            element = x == null ? '#wordcloud' : x;
+                            return wordcloud
+                        };
+
+                        wordcloud.selector = function (x) {
+                            if (!arguments.length) return selector;
+                            element = d3.select(x == null ? selector : x);
+                            return wordcloud;
+                        };
+
+                        wordcloud.transitionDuration = function (x) {
+                            if (!arguments.length) return transitionDuration;
+                            transitionDuration = typeof x == 'function' ? x() : x;
+                            return wordcloud;
+                        };
+
+                        wordcloud.scale = function (x) {
+                            if (!arguments.length) return scale;
+                            scale = x == null ? 'sqrt' : x;
+                            return wordcloud;
+                        };
+
+                        wordcloud.fill = function (x) {
+                            if (!arguments.length) return fill;
+                            fill = x == null ? d3.scale.category20b() : x;
+                            return wordcloud;
+                        };
+
+                        wordcloud.onwordclick = function (func) {
+                            onwordclick = func;
+                            return wordcloud;
+                        }
+
+                        wordcloud.start = function () {
+                            init();
+                            layout.start(arguments);
+                            return wordcloud;
+                        };
+
+                        function init() {
+                            layout
+                                .fontSize(function (d) {
+                                    return fontSize(+d.size);
+                                })
+                                .text(function (d) {
+                                    return d.text;
+                                })
+                                .on("end", draw);
+
+                            svg = element.append("svg");
+                            vis = svg.append("g").attr("transform", "translate(" + [layout.size()[0] >> 1, layout.size()[1] >> 1] + ")");
+
+                            update();
+                            svg.on('resize', function () { update() });
+                        }
+
+                        function draw(data, bounds) {
+                            var w = layout.size()[0],
+                                h = layout.size()[1];
+
+                            svg.attr("width", w).attr("height", h);
+
+                            scaling = bounds ? Math.min(
+                                w / Math.abs(bounds[1].x - w / 2),
+                                w / Math.abs(bounds[0].x - w / 2),
+                                h / Math.abs(bounds[1].y - h / 2),
+                                h / Math.abs(bounds[0].y - h / 2)) / 2 : 1;
+
+                            var text = vis.selectAll("text")
+                                .data(data, function (d) {
+                                    return d.text.toLowerCase();
+                                });
+                            text.transition()
+                                .duration(transitionDuration)
+                                .attr("transform", function (d) {
+                                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                                })
+                                .style("font-size", function (d) {
+                                    return d.size + "px";
+                                });
+                            text.enter().append("text")
+                                .attr("text-anchor", "middle")
+                                .attr("transform", function (d) {
+                                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                                })
+                                .style("font-size", function (d) {
+                                    return d.size + "px";
+                                })
+                                .style("opacity", 1e-6)
+                                .transition()
+                                .duration(transitionDuration)
+                                .style("opacity", 1);
+                            text.style("font-family", function (d) {
+                                return d.font || layout.font() || svg.style("font-family");
+                            })
+                                .style("fill", function (d) {
+                                    return fill(d.text.toLowerCase());
+                                })
+                                .text(function (d) {
+                                    return d.text;
+                                })
+                                // clickable words
+                                .style("cursor", function (d, i) {
+                                    if (onwordclick !== undefined) return 'pointer';
+                                })
+                                .on("mouseover", function (d, i) {
+                                    if (onwordclick !== undefined) {
+                                        d3.select(this).transition().style('font-size', d.size + 3 + 'px');
+                                    }
+                                })
+                                .on("mouseout", function (d, i) {
+                                    if (onwordclick !== undefined) {
+                                        d3.select(this).transition().style('font-size', d.size + 'px');
+                                    }
+                                })
+                                .on("click", function (d, i) {
+                                    if (onwordclick !== undefined) {
+                                        onwordclick(d, i);
+                                    }
+                                });
+
+                            vis.transition()
+                                .attr("transform", "translate(" + [w >> 1, h >> 1] + ")scale(" + scaling + ")");
+                        };
+
+                        function update() {
+                            var words = layout.words();
+                            fontSize = d3.scale[scale]().range([10, 100]);
+                            if (words.length) {
+                                fontSize.domain([+words[words.length - 1].size || 1, +words[0].size]);
+                            }
+                        }
+
+                        return d3.rebind(wordcloud, layout, 'on', 'words', 'size', 'font', 'fontStyle', 'fontWeight', 'spiral', 'padding');
+                    }
+
+                    if (typeof module === "object" && module.exports) module.exports = wordcloud;
+                    else d3.wordcloud = wordcloud;
+                })();
+
+                //////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+                var margin = { top: 20, right: 20, bottom: 70, left: 40 },
+                    width = 600 - margin.left - margin.right,
+                    height = 300 - margin.top - margin.bottom;
+
+                // Parse the data / time
+                var duration = 1500,
+                delay = 500;
+
+                var x = d3.scale.ordinal().rangeRoundBands([0, width], .05);
+
+                var y = d3.scale.linear().range([height, 0]);
+
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom")
+                    .ticks(10);
+
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left")
+                    .ticks(10);
+
+                var svg = d3.select("#theSvg").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+                var data = data
+
+                data.forEach(function (d) {
+                    d.data = d.data;
+                    d.value = +d.value;
+                });
+
+                x.domain(data.map(function (d) { return d.data; }));
+                y.domain([0, d3.max(data, function (d) { return d.value; })]);
+
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", "-.55em")
+                    .attr("transform", "rotate(-90)");
+
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+
+                svg.selectAll("bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .style("fill", "steelblue")
+                    .attr("x", function (d) { return x(d.data); })
+                    .attr("width", x.rangeBand())
+                    .attr("y", function (d) { return y(d.value); })
+                    .attr("height", function (d) { return height - y(d.value); })
+                      .on('mouseover', function(d, i) {
+                             d3.select(this).style('fill','red');
+                             statusText
+                                .text(d.data)
+                                .attr('fill',"black")
+                                .attr("text-anchor", d.value < 0 ? "begin" : "begin")
+                                .attr("x", x(d.data)  + x.rangeBand() / 2 )
+                                .attr("y", y(d.value))
+                                .attr("transform", d.perf < 0 ? "rotate(90 " + (x(d.data)  + x.rangeBand() / 4 ) + "," +   y(d.value) + ")" : "rotate(-90 " + (x(d.data)  + x.rangeBand() / 4 ) + "," +   y(d.value) + ")"); 
+                          })
+                          .on('mouseout', function(d,i) {
+                             statusText
+                                .text('');
+                             d3.select(this).style('fill',"steelblue");
+                          })
+                          .transition()
+                                .duration(duration)
+                                .style("fill-opacity", 1);
+                var statusText = svg.append('svg:text');
+                console.log(d3);
+
+                d3.wordcloud()
+                    .size([600, 400])
+                    .selector('#wordcloud')
+                    .words(word_cloud)
+                    .start();
+
+            }
+
+        };
+        $(function () {
+            $('#chatbot-form-btn').click(function (e) {
+                e.preventDefault();
+                $('#chatbot-form').submit();
+            });
+
+            $('#chatbot-form').submit(function (e) {
+                e.preventDefault();
+
+                $('#lda_graph').html('');
+                $('#includedContent').html('');
+                $('#wordcloud').html('');
+                $('#the_topics').html('');
+                $('#theSvg').html('');
+                $('#thePie').html('');
+                $('#hex-map').html($('#loader').html());
+                $('#div_tbl_tr').html('');
+                $('#topic_sim').html('');
+                $('#topic_display').html('');
+                var message = $('#messageText').val();
+                $(".media-list").append('<li class="media"><div class="media-body"><div class="media"><div class="media-body">' + message + '<hr/></div></div></div></li>');
+                $('#messageText').val('');
+                console.log(message)
+
+                $.ajax({
+                    type: "POST",
+                    url: "/ask",
+                    cache: false,
+                    data: { 'message': message },
+                    success: function (response) {
+                        $('#messageText').val('');
+                        var answer = response.answer.result;
+                        const chatPanel = document.getElementById("chatPanel");
+                        $(".media-list").append('<li class="media"><div class="media-body"><div class="media"><div class="media-body">' + answer + '<hr/></div></div></div></li>');
+                        $('#hex-map').html('');
+                        hex_map(response.answer.hex_data,response.answer.segregated);
+                        topic_relevance_tbl(response.answer.segregated);
+                        topic_sim_result(response.answer.topic_result);
+                        topic_display_result(response.answer.display_result);
+                        
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+        function topic_relevance_tbl(argument) {
+            $('#div_tbl_tr').html('');
+            header=  '<div class="span7">   <div class="widget stacked widget-table action-table"><div class="widget-header"><span class="glyphicon glyphicon-list"></span></i><h3>Topic Relevance Table</h3></div> <div class="widget-content"><table class="table table-striped table-bordered" id="tbl_data"><thead><tr><th>Text No.</th><th>Text</th><th>URL</th><th>Topic Relevance</th></tr></thead><tbody>'
+            body=''
+            for (var i = argument.length - 1; i >= 0; i--) {
+                content=argument[i].snippet2
+                if(content.length>50){
+                    content=content.substring(0,100)+'...'
+                }
+                relevance=argument[i]['Text Relevance']
+                if(!isNaN(relevance)){
+                    relevance=relevance.toFixed(2)
+                }
+                link='<a target="_blank" href="'+decodeURIComponent(argument[i].url)+'">Link</a> '
+                body=body+'<tr><td>'+argument[i]['Text']+'</td><td>'+content+'</td><td>'+link+'</td><td class="rel">'+relevance+'</td></tr>'
+            }
+            body=body+'</tbody></table></div></div></div>'
+            if (argument.length>0) {$('#div_tbl_tr').html(header+body);
+                }
+            
+        }
+        
+        //------- topic sim -------------//
+        function topic_sim_result(param){
+        	$('#topic_sim').html(param);
+        }
+
+        //-------- topic relevence ----------//
+        function sortTable($table,order){
+            var $rows = $('tbody > tr', $table);
+            $rows.sort(function (a, b) {
+                var keyA = parseFloat($('.rel', a).text());
+                var keyB = parseFloat($('.rel', b).text());
+                if (order=='asc') {
+                    return (keyA > keyB) ? 1 : 0;
+                } else {
+                    return (keyA > keyB) ? 0 : 1;
+                }
+            });
+            $.each($rows, function (index, row) {
+                $table.append(row);
+            });
+        }
+
+        //------- topic display -------------//
+        function topic_display_result(param){
+            $('#topic_display').html('');
+
+            header=  '<br><br><div class="span7">   <div class="widget stacked widget-table action-table"><div class="widget-header"><span class="glyphicon glyphicon-list"></span></i><h3>Topic  Table</h3></div> <div class="widget-content"><table class="table table-striped table-bordered"><thead><tr><th>Topic No</th><th>Topic Content</th></tr></thead><tbody></div></div></div>';
+            body='';
+
+            for (var i=0; i <= param.length-1; i++) {
+				topic_idx= "Topic "+i;
+                topic= param[i];
+                body=body+'<tr><td>'+topic_idx+'</td><td>'+topic+'</td></tr>';
+            }
+            body=body+'</tbody></table>';
+            if (param.length>0) {$('#topic_display').html(header+body);}
+        }
+        
+    </script>
+
+<style type="text/css">
+    .table-bordered {
+border: 1px solid #dddddd;
+border-collapse: separate;
+border-left: 0;
+-webkit-border-radius: 4px;
+-moz-border-radius: 4px;
+border-radius: 4px;
+}
+
+.table {
+width: 100%;
+margin-bottom: 20px;
+background-color: transparent;
+border-collapse: collapse;
+border-spacing: 0;
+display: table;
+}
+
+.widget.widget-table .table {
+margin-bottom: 0;
+border: none;
+}
+
+.widget.widget-table .widget-content {
+padding: 0;
+}
+
+.widget .widget-header + .widget-content {
+border-top: none;
+-webkit-border-top-left-radius: 0;
+-webkit-border-top-right-radius: 0;
+-moz-border-radius-topleft: 0;
+-moz-border-radius-topright: 0;
+border-top-left-radius: 0;
+border-top-right-radius: 0;
+}
+
+.widget .widget-content {
+padding: 20px 15px 15px;
+background: #FFF;
+border: 1px solid #D5D5D5;
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius: 5px;
+}
+
+.widget .widget-header {
+    padding-left: 10px;
+position: relative;
+
+line-height: 40px;
+background: #E9E9E9;
+background: -moz-linear-gradient(top, #fafafa 0%, #e9e9e9 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #e9e9e9));
+background: -webkit-linear-gradient(top, #fafafa 0%, #e9e9e9 100%);
+background: -o-linear-gradient(top, #fafafa 0%, #e9e9e9 100%);
+background: -ms-linear-gradient(top, #fafafa 0%, #e9e9e9 100%);
+background: linear-gradient(top, #fafafa 0%, #e9e9e9 100%);
+text-shadow: 0 1px 0 #fff;
+border-radius: 5px 5px 0 0;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1),inset 0 1px 0 white,inset 0 -1px 0 rgba(255,255,255,0.7);
+border-bottom: 1px solid #bababa;
+filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9');
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#FAFAFA', endColorstr='#E9E9E9')";
+border: 1px solid #D5D5D5;
+-webkit-border-top-left-radius: 4px;
+-webkit-border-top-right-radius: 4px;
+-moz-border-radius-topleft: 4px;
+-moz-border-radius-topright: 4px;
+border-top-left-radius: 4px;
+border-top-right-radius: 4px;
+-webkit-background-clip: padding-box;
+}
+
+thead {
+display: table-header-group;
+vertical-align: middle;
+border-color: inherit;
+}
+
+.widget .widget-header h3 {
+top: 2px;
+position: relative;
+left: 10px;
+display: inline-block;
+margin-right: 3em;
+font-size: 14px;
+font-weight: 600;
+color: #555;
+line-height: 18px;
+text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.widget .widget-header [class^="icon-"], .widget .widget-header [class*=" icon-"] {
+display: inline-block;
+margin-left: 13px;
+margin-right: -2px;
+font-size: 16px;
+color: #555;
+vertical-align: middle;
+}
+.table-striped>tbody>tr:nth-of-type(odd) {
+    background-color: #d3e9f9;
+}
+.table-striped>tbody>tr:nth-child(even) {
+    background-color: #edf4f9;
+}
+
+</style>
+
+
+</body>
+
+</html>

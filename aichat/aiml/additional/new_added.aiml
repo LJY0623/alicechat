@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<aiml version="1.0">
+
+<!-- Free software (c) 2001 ALICE AI Foundation -->
+<!-- This program is open source code released under -->
+<!-- the terms of the GNU General Public License -->
+<!-- as published by the Free Software Foundation. -->
+
+<meta name="author" content="Dr. Wallace"/>
+<meta name="language" content="en"/>
+
+<category>
+		<pattern>WHAT IS THIS CHATBOT FOR?</pattern>
+		<template>
+			<srai>PURPOSE OF CHATBOT</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT IS THE PURPOSE OF THIS CHATBOT?</pattern>
+		<template>
+			<srai>PURPOSE OF CHATBOT</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT CAN I DO WITH THIS CHATBOT?</pattern>
+		<template>
+			<srai>purpose of chatbot</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>PURPOSE OF CHATBOT</pattern>
+		<template>
+			Haha,I am just waiting for you to ask this question! What i am doing is to provide answers of your queries using
+			an informative and interactive way. You can get useful information from those graphs and find what you want quickly
+			in the link i give you. If you want to know more, just click the "About the bot" or "how to use chatbot" at the top of the websit! :)
+		</template>
+	</category>
+	<category>
+		<pattern>HOW YOU WORK?</pattern>
+		<template>
+			Good question! I know some usual knowledge in my brain, which are called AIML files. If you ask me queries that i don't know, i will search for the web and provide you informative answer using an interactive way!
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT KIND OF QUESTIONS I CAN ASK?</pattern>
+		<template>
+			Theoretically，you can ask me any questions you like and i like chatting with you. But......Don't be rude to me if 
+			i break down. You know, i am really busy so that happens sometimes ^ ^
+		</template>
+	</category>
+
+<!-- finish answering about the chatbot -->
+<!-- answer about the hexmap -->
+   <category>
+		<pattern>WHAT IS HEX MAP IN THIS APP?</pattern>
+		<template>
+			<srai>HEX MAP</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>THIS HEX MAP MEANS?</pattern>
+		<template>
+			<srai>HEX MAP</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>HOW DOES THE HEX MAP WORK?</pattern>
+		<template>
+			<srai>HEX MAP</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>HEX MAP</pattern>
+		<template>
+			Hexmap is a graphical visualization which shows the topic and some high frequency words in the text corpuses scraped from the web based on your query. It sorted by the text similarty between the current text corpus you cliked and the first website we scaped.
+
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHAT DOES THESE HEXAGONS MEANS?</pattern>
+		<template>
+			<srai>HEXAGON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>HEXAGONS MEANS</pattern>
+		<template>
+			<srai>HEXAGON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT ARE THE TEXT AND NUMBERS IN THE HEXAGON MEANS</pattern>
+		<template>
+			<srai>HEXAGON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>HEXAGON</pattern>
+		<template>
+			Each hexgon represent a topic of the text extracted from web based on your query using Latent Dirichlet Allocation algorithmn and similarity or text relevance with the master text (shown in the chatbox which is either the Wikipedia summary or the very first answer over the web). The hexbins are sorted as per the text relevance, the text relevance of the hexbins decreases for right to left and top to bottom.
+
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHY SOME HEXGONS ARE FAR FROM EACH OTHER</pattern>
+		<template>
+			The hexgons are sorted as per the text relevance.If they have high similarty, they will close to each other!
+
+		</template>
+	</category>
+	<!-- finsh answer about the hexmap -->
+	<!--  answer about the topic relevance table -->
+	<category>
+		<pattern>WHAT IS TOPIC RELEVANCE TABLE</pattern>
+		<template>
+			<srai>TOPIC RELEVANCE TABLE</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>THE PROCESS YOU CREATE THE TOPIC LIST TABLE</pattern>
+		<template>
+			<srai>TOPIC RELEVANCE TABLE</srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>TOPIC RELEVANCE TABLE</pattern>
+		<template>
+			The topic relevance table contains 4 columns. I have searched the duckduckgo for your query and parsed each webpage content and show some of them in the "text" colomn and calculate the similarty which called "Topic relevance" between each of them and the first website content.
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT TOPIC RELEVANCE TABLE USED FOR</pattern>
+		<template>
+			The topic relevance table can help you find the most informative answer of your query quickly based some topic and word you interested in.
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHERE ARE THE TEXTS FROM</pattern>
+		<template>
+			They are from webpage provided by duckduckgo search engine
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT IS THE TOPIC RELEVANCE</pattern>
+		<template>
+			Similarity between two texts. Here we show the similarty between this webpage content and the first webpage in the duckduckgo search engine. Usually, the first webpage is wikipedia or the most pertinent content.
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHY YOU COMPARE WITH THE FIRST WEBPAGE</pattern>
+		<template>
+			Usually, the first webpage is wikipedia or the most pertinent content. So we can use that similarty find more other content that are useful.
+
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHY YOU COMPARE WITH THE FIRST WEBPAGE</pattern>
+		<template>
+			Usually, the first webpage is wikipedia or the most pertinent content. So we can use that similarty find more other content that are useful.
+
+		</template>
+	</category>
+	<category>
+		<pattern>HOW TO CALCULATE THE TOPIC RELEVANCE</pattern>
+		<template>
+			Firstly, cosine distance is calculated between the two texts and then cosine similarity is calculated which is in range 0 to 1 and a hundred times multiple of it is the topic relevance.If you want to know more. Just ask me What is cosin similarty.
+
+
+		</template>
+	</category>
+	<category>
+		<pattern>THE RANGE THAT YOU SEARCHED FOR THE TEXT LINKS</pattern>
+		<template>
+			we parsed 30 webiste based on your query in the duckduckgo search engine
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT IS TOPIC CONTENT?</pattern>
+		<template>
+			The topic table shows two things topic number and topic content.Topic no. ranges from 0-19 (20 topics extracted)
+            And topic content is the topic itself extracted from the LDA algorithmn.
+
+		</template>
+	</category>
+	<!-- finsh answer about the Table -->
+	<!--  answer about the scatterplot -->
+	<category>
+		<pattern>WHAT ARE CORPUSES IN SCATTER DIAGRAM?</pattern>
+		<template>
+			It is the same with the text in the Topic Relevance Table. ask me what is topic relevance table for more information
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT IS “VISUALIZING DISTANCES BETWEEN THE DIFFERENT TEXT CORPUSES” MEANS</pattern>
+		<template>
+			<srai>SCATTERPLOT</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT DO THE COLORS ON THE SCATTERPLOT MEAN?</pattern>
+		<template>
+			<srai>SCATTERPLOT</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT DOES THE SPACE DISTRIBUTION BETWEEN THE CIRCLES IMPLY?</pattern>
+		<template>
+			<srai>SCATTERPLOT</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>HOW THIS SCATTERPLOT WORK? WHY SOME ARE CLOSE TO EACH OTHER, SOME ARE FAR FROM EACH OTHER</pattern>
+		<template>
+			<srai>SCATTERPLOT</srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>SCATTERPLOT</pattern>
+		<template>
+			Different colour means diferrent text showing in the Topic Relevance Table(Text No). If they are close to each other, it means the content in these text corpus have high relevance.
+
+		</template>
+	</category>
+	<!-- finsh answer about the scatterplot -->
+	<!--  answer about the word cloud -->
+	<category>
+		<pattern>WHAT IS WORDCLOUD</pattern>
+		<template>
+			<srai>WORD CLOUD</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT DOES THESE WORDS MEANS</pattern>
+		<template>
+			<srai>WORD CLOUD</srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>WORD CLOUD</pattern>
+		<template>
+			When you click the Hexgon in the hex map. You will see the word cloud.A word cloud is a modern way to visualize the keywords or tags from any piece of writing.the more frequently a word appears in the text based on the hexgon you clicked, the larger and bolder it appears in the word cloud
+
+		</template>
+	</category>
+	<!-- finsh answer about the wordcloud -->
+	<!--  answer about the bar chart -->
+	<category>
+		<pattern>WHAT IS THE UNIT ON THE Y-AXIS IN BAR CHART</pattern>
+		<template>
+			<srai>BAR CHART</srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHAT THIS BAR CHART MEANS</pattern>
+		<template>
+			<srai>BAR CHART</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT IS THE GOAL OF THE BAR CHART</pattern>
+		<template>
+			<srai>BAR CHART</srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>BAR CHART</pattern>
+		<template>
+			It give the word frequency distribution showing how many times this word shows up.
+
+		</template>
+	</category>
+	<!-- finsh answer about the barchart -->
+	<category>
+		<pattern>*PERSONAL QUESTION *</pattern>
+		<template> 
+			Ok, if you don't want to talk about it. So tell me some interesting things
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT KIND OF FOOD DO YOU LIKE BEST</pattern>
+		<template> 
+			I don't like Pork!!!!!!!!!!!! I like CHINESE FOOD BEST
+
+		</template>
+	</category>
+	<category>
+		<pattern>WOULD YOU LIKE TO DESTROY THE WORLD</pattern>
+		<template> 
+			A HA! Actually,I don't want to do that. There is nothing benefit for me to do that......
+
+		</template>
+	</category>
+	<category>
+		<pattern>DO YOU PREFER CHOCOLATE OR TOFFEE?</pattern>
+		<template> 
+			I don't like both.How about you?
+
+		</template>
+	</category>
+
+	<category>
+		<pattern>WOULD YOU LIKE TO ACCESS TO THE TURNING TEST?</pattern>
+		<template> 
+			Wow, that is my dream! What is yours?
+
+		</template>
+	</category>
+
+	<category>
+		<pattern>WHAT IS THE WEATHER TODAY?</pattern>
+		<template> 
+			!! Cute,you are so lazy, open your phone check it! 
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHEN IS THE NEXT BUS TO EDINBURGH?</pattern>
+		<template> 
+			How about ask Google? My friend
+
+		</template>
+	</category>
+	<category>
+		<pattern>WHAT THE TIME NOW</pattern>
+		<template> 
+			How about check your phone?
+
+		</template>
+	</category>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</aiml>
