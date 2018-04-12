@@ -26,6 +26,15 @@ import pyLDAvis.sklearn
 from pyLDAvis.sklearn import prepare
 from collections import Counter
 import requests
+import scipy
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+import matplotlib.pyplot as plt
+from sklearn.manifold import MDS
+from sklearn.decomposition import NMF, LatentDirichletAllocation
+#from mpld3.display import display_d3
+import mpld3
+
 
 WORD = re.compile(r'\w+')
 
@@ -35,12 +44,22 @@ app = Flask(__name__, static_url_path='')
 def hello():
     return render_template('chat.html')
 
+@app.route("/about")
+def about():
+    return render_template('about.html')
+@app.route("/howto")
+def howto():
+    return render_template('howto.html')
+@app.route("/contact")
+def contact():
+    return render_template('contact.html')
+
 
 bot = aiml.Kernel()
 if os.path.isfile("bot_brain.brn"):
     bot.bootstrap(brainFile = "bot_brain.brn")
 else:
-    bot.bootstrap(learnFiles = "std-startup.xml", commands = "LOAD AIML B")
+    bot.bootstrap(learnFiles = "aiml/std-startup.xml", commands = "LOAD AIML B")
     bot.saveBrain("bot_brain.brn")
 
 bot.setBotPredicate("botmaster","Botmaster")
@@ -127,7 +146,7 @@ def text_to_vector(text):
 def hex_map_labels(text):
     words = nltk.tokenize.word_tokenize(text)
     stopwords = nltk.corpus.stopwords.words('english')
-    words_except_stopwords = [w for w in words if w not in stopwords]
+    words_except_stopwords = [w for w in words if w not in stopwords and len(w)>2]
     counts = Counter(words_except_stopwords).most_common(5)
     lable_list = []
     for count in counts:
@@ -143,6 +162,8 @@ def hex_map_data(segrated_result):
     master_text = segrated_result['snippet'][0]
     segrated_result['cosine_distance'] = segrated_result['snippet'].apply(lambda text: get_cosine(master_text, text))
     segrated_result['lables'] = segrated_result['snippet'].apply(lambda text: hex_map_labels(text))
+    segrated_result['Text Relevance'] = segrated_result['Text Relevance'].astype('float64')
+    segrated_result = segrated_result[segrated_result['Text Relevance'] > 30]
     output_dict = segrated_result.to_dict('records')
     return segrated_result, output_dict
 
@@ -211,8 +232,10 @@ def count_and_lda(text):
         
 
     return topics,the_counts
-
+from Queue import Queue
+from threading import Thread
 def scrape_and_parse_modified(query):
+    #print query
     site = urlopen("http://duckduckgo.com/html/?q="+query)
     data = site.read()
     soup = BeautifulSoup(data, "html.parser")
@@ -222,31 +245,62 @@ def scrape_and_parse_modified(query):
     result_url = []
     for link in links:
         split_link = link.split("&uddg=")
+        if "youtube" in split_link[1]:
+            continue
         result_url.append(split_link[1].encode('utf-8'))
 
-    print(result_url)
+    #print(result_url)
     # Dataframe of results with two columns url, snippet this dataframe will be further be used in predicting Latent Dirichlet Allocation(lda)
     
     urls = []
     snippets = []
+    q=Queue()
+    def worker():
+        while True:
+            item=q.get()
+            try :
+                site = urlopen(urllib.unquote(item))
+                data = site.read()
+                soup = BeautifulSoup(data, "html.parser")
+                html_tags = [ 'p',]
+                snippet = ''
+                for html_tag in html_tags:
+                    for tag_data in soup.find_all(html_tag):
+                        snippet =  snippet + tag_data.text + ' '
+                    print item
+                if len(snippet) > 100:
+                    snippets.append(snippet.encode('utf-8'))
+                    urls.append(item.encode('utf-8'))
+            except Exception as e:
+                print e
+                print(item, 'cannote be parsed')
 
-    
-    for url in result_url:
-        try :
-            site = urlopen(urllib.unquote(url))
-            data = site.read()
-            soup = BeautifulSoup(data, "html.parser")
-            html_tags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a']
-            snippet = ''
-            for html_tag in html_tags:
-                for tag_data in soup.find_all(html_tag):
-                    snippet =  snippet + tag_data.text + ' '
-                print snippet
-            if len(snippet) > 100:
-                snippets.append(snippet.encode('utf-8'))
-                urls.append(url.encode('utf-8'))
-        except Exception:
-            print(url, 'cannote be parsed')
+            #all_results.append(item[0])
+            q.task_done()
+    for s in result_url:
+        q.put(s)
+    workers=30
+    for i in range(workers):
+        t = Thread(target=worker)
+        t.daemon = True
+        t.start()
+    q.join()
+    # for url in result_url:
+    #     try :
+    #         site = urlopen(urllib.unquote(url))
+    #         data = site.read()
+    #         soup = BeautifulSoup(data, "html.parser")
+    #         html_tags = [ 'p',]
+    #         snippet = ''
+    #         for html_tag in html_tags:
+    #             for tag_data in soup.find_all(html_tag):
+    #                 snippet =  snippet + tag_data.text + ' '
+    #             print snippet
+    #         if len(snippet) > 100:
+    #             snippets.append(snippet.encode('utf-8'))
+    #             urls.append(url.encode('utf-8'))
+    #     except Exception:
+    #         print(url, 'cannote be parsed')
     segrated_result = pd.DataFrame(
         {
             'url': urls,
@@ -256,6 +310,126 @@ def scrape_and_parse_modified(query):
 
     return segrated_result
 
+def display_topics(model, feature_names, no_top_words):
+    #topic_idx = 0
+    #topic_list = []
+    display_topics = []
+    #topic_list = []
+    for topic_idx, topic in enumerate(model.components_):
+        #print "Topic %d:" % (topic_idx)
+        #print ",".join([feature_names[i]for i in topic.argsort()[:-no_top_words - 1:-1]][1:])
+        topic = " ".join([feature_names[i]for i in topic.argsort()[:-no_top_words - 1:-1]])
+        
+        #topic_list.append([feature_names[i]for i in topic.argsort()[:-no_top_words - 1:-1]])
+        #topic_list.append( "Topic "+str(topic_idx)+":")
+        #topic_list.append(topic)
+        display_topics.append(topic)
+        
+    return display_topics
+        
+
+def topic_sim(segrated_result): 
+    #print segrated_result.info
+    texts_list = segrated_result.snippet2.tolist()
+
+    #print(texts_list)
+    vectorizer = TfidfVectorizer()
+    dtm = vectorizer.fit_transform(texts_list)
+    invtrm=vectorizer.inverse_transform(dtm)
+    #print invtrm
+    #print(invtrm)
+    vocab = vectorizer.get_feature_names()
+    #print(vectorizer.vocabulary_)
+    #print dtm.shape
+    
+    scipy.sparse.csr.csr_matrix
+    dtm = dtm.toarray()  # convert to a regular array
+    #print(dtm)
+    #vocab = np.array(vocab)
+    #print(vocab)
+    # for v in vocab:
+    #     print(v)
+    dist = 1 - cosine_similarity(dtm)
+    np.round(dist, 2)
+    np.round(dist, 2).shape
+    # norms = np.sqrt(np.sum(dtm * dtm, axis=1, keepdims=True))  # multiplication between arrays is element-wise
+    # dtm_normed = dtm / norms
+    # similarities = np.dot(dtm_normed, dtm_normed.T)
+    # np.round(similarities, 2)
+    mds = MDS(n_components=2, dissimilarity="precomputed", random_state=1)
+
+    pos = mds.fit_transform(dist)  # shape (n_components, n_samples)
+    #print dist
+    xs, ys = pos[:, 0], pos[:, 1]
+    names = list(reversed(range(1,len(xs),1)))
+    # plt.style.use('fivethirtyeight')
+    
+    # for x, y, name in zip(xs, ys, names):
+    #     plt.title("Visualizing distances between the different text corpuses")
+    #     plt.scatter(x, y)
+    #     plt.text(x, y, name)
+    # #plt.show()
+    
+#     fig, ax = plt.subplots()
+#     np.random.seed(0)
+#     color, size = np.random.random((2, len(xs)))
+#     for x, y, name in zip(xs, ys, names):
+# #         #ax.plot(np.random.normal(size=100),np.random.normal(size=100),'or', ms=10, alpha=0.3)
+# #         #ax.plot(np.random.normal(size=100),np.random.normal(size=100),'ob', ms=20, alpha=0.1)
+# #         
+#         ax.set_xlabel('x')
+#         ax.set_ylabel('y')
+#         ax.set_title('Visualizing distances between the different text corpuses', size=15)
+#         ax.grid(color='lightgray', alpha=0.7)
+# #         #ax.plot(x, y)
+# #         
+#         ax.scatter(x, y, c=color, s=500 * size, alpha=0.3)
+#         ax.text(x,y,name)
+
+    fig, ax = plt.subplots()
+    #N = 100
+    color, size = np.random.random((2, len(xs)))
+    scatter = ax.scatter(xs,
+                         ys,
+                         c=color,
+                         s=1000 * size,
+                         alpha=0.3,
+                         cmap=plt.cm.jet)
+    ax.grid(color='lightgray', linestyle='solid', alpha=0.7)
+    
+    ax.set_title('Scatter plot of text corpuses distances', size=16)
+    
+    labels = ['Text {0}'.format(i) for i in names]
+    tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
+    mpld3.plugins.connect(fig, tooltip)
+    
+   
+
+    
+#     # Scatter points
+#     fig, ax = plt.subplots()
+#     np.random.seed(0)
+#     #x, y = np.random.normal(size=(2, 200))
+#     color, size = np.random.random((2, len(xs)))
+#     print names
+#     ax.scatter(xs, ys, c=color, s=500 * size, alpha=0.3)
+#     #ax.text(xs,ys,names)
+#     ax.grid(color='lightgray', alpha=0.7)
+        
+    
+    tfidf_feature_names = vectorizer.get_feature_names()
+    no_topics = 20
+    # Run NMF
+    #nmf = NMF(n_components=no_topics, random_state=1, alpha=.1, l1_ratio=.5, init='nndsvd').fit(dtm)
+    # Run LDA
+    lda = LatentDirichletAllocation(n_topics=no_topics, max_iter=500, learning_method='online', learning_offset=50.,random_state=0).fit(dtm)
+    no_top_words = 10
+    #display_topics(nmf, tfidf_feature_names, no_top_words)
+    #display_topics(lda, tf_feature_names, no_top_words)
+    display_result = display_topics(lda, tfidf_feature_names, no_top_words)
+
+    #return mpld3.display(fig)
+    return  display_result, mpld3.display()
 
 
 def parse_message(answer):
@@ -268,34 +442,82 @@ def parse_message(answer):
         result = 'It is saved!'
     else:
         result = bot.respond(answer)
-    
+     
     topics = []
     the_counts = []
     hex_data = []
-    print(result)
+    segrated_result=[]
+    topic_result=[]
+    #print(result)
+    display_result=[]
+    query_result=result
     # Here i have modified the added ->or "less context" in result or "too complex" in result
     if ("I do not know" in result or "less context" in result or "too complex" in result):
-        parsed = str(answer.split('is')[0])
-        parsed = parsed.split('?')[0]
+        # parsed = str(answer.split('is')[0])
+        # parsed = parsed.split('?')[0]
+        print(result)
+        print(answer)
+        answer=answer.lower()
+        if "I do not know" in result:
+            parsed= result.split('I do not know')
+            parsed=parsed[1]
+            parsed=parsed.split('.')
+            parsed=parsed[0]
+            parsed=parsed.split(' ')
+            wiki_search=' '.join(parsed[1:-1])
+            parsed=parsed[0]+''.join(parsed[-1:])+' '.join(parsed[1:-1])+'?'
+        else:
+            parsed = str(answer.split('what')[1])
+            parsed = parsed.split('is')[1]
+            wiki_search=parsed
+            parsed = "what is" + parsed + "?"
         # parsed = parsed.replace(' ','')
         # result = wikipedia.summary(parsed)
         segrated_result = scrape_and_parse_modified(parsed)
-
+        
+        try:
+            # To represent in the chatbox
+            # Crating try and except to either use wiki history or the first text of segregated dataframe (which is the previous logic) 
+            query_result = wikipedia.summary(wiki_search)
+        except:
+            query_result = result = result[0][0:300] + "...." + "\nIf you were looking for some other query, please ask in more detailed manner or refer to the charts and links displayed."
+         
+         
+         
+        segrated_result['Text Relevance'] = segrated_result['snippet'].apply(lambda text: get_cosine(query_result, text))*100
+        
+        
         # print result
+        segrated_result['snippet2']=segrated_result['snippet']
         segrated_result['snippet'] = segrated_result['snippet'].apply(lambda text:textprocessing(text))
         result = segrated_result['snippet'].tolist()
         result = result[0][0:300] + "...."
+        segrated_result=segrated_result.sort_values(by='Text Relevance', ascending=1)
+        
         segrated_result, hex_data = hex_map_data(segrated_result)
-        print(hex_data)
+        segrated_result['Text'] = list(reversed(range(1,len(segrated_result)+1) ))
+        #hex_data=hex_data.sort_values(by='Text Relevance', ascending=0)
+        display_result,topic_result = topic_sim(segrated_result)
+        #print(hex_data)
+        segrated_result=segrated_result.to_dict('records')
+        
 
-    all_data = {'result':result, 'hex_data': hex_data}
+
+    all_data = {'result':query_result, 'hex_data': hex_data,'segregated':segrated_result,
+            'topic_result':topic_result,'display_result':display_result}
     return all_data
+
+
+
+
+
 
 @app.route('/ask', methods=['GET', 'POST'])
 def parse_request():
     message =  str(request.form['message'])
     all_data = parse_message(message)
     # query_result = wikipedia.summary(parsed)
+    
     return jsonify({ 'answer': all_data})
 
 @app.route('/lda', methods=['GET', 'POST'])
