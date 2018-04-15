@@ -1,33 +1,33 @@
 
-aiml==0.8.6
+aiml
 flask
-beautifulsoup4==4.6.0
+beautifulsoup4
 
-click==6.7
+click
 
-duckduckpy==0.2
-Flask==0.12.2
-
-lda==1.0.5
-
-matplotlib==2.2.2
-mpld3==0.3
-nltk==3.2.5
-
-numpy==1.14.2
-pandas==0.22.0
+duckduckpy
 
 
-pyLDAvis==2.1.1
+lda
 
-requests==2.18.4
+matplotlib
+mpld3
+nltk
 
-scikit-learn==0.19.1
-scipy==1.0.0
+numpy
+pandas
 
-sklearn==0.0
 
-urllib3==1.22
+pyLDAvis
 
-wikipedia==1.4.0
-wordcloud==1.4.1
+requests
+
+scikit-learn
+scipy
+
+sklearn
+
+urllib3
+
+wikipedia
+wordcloud
