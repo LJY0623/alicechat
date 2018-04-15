@@ -13,7 +13,7 @@ import numpy as np
 from wordcloud import WordCloud, STOPWORDS 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from sklearn.datasets import fetch_20newsgroups
+#from sklearn.datasets import fetch_20newsgroups
 from nltk.stem.snowball import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
 import nltk
