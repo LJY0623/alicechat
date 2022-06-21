@@ -29,7 +29,7 @@ more-itertools==4.1.0
 mpld3==0.3
 nltk==3.2.5
 numexpr==2.6.4
-numpy==1.14.2
+numpy==1.22.0
 pandas==0.22.0
 pathlib2==2.3.0
 pbr==4.0.0
